@@ -29,7 +29,7 @@ public class PanelHistograma extends JPanel {
     public PanelHistograma(){
     	anchoHist = 300;
     	System.out.print("ancho: "+anchoHist);
-    	altoHist= 180;
+    	altoHist= 150;
     	img = new BufferedImage(anchoHist , altoHist , BufferedImage.TYPE_BYTE_GRAY);
     	
     	frecNivel = new long[256];
@@ -66,9 +66,9 @@ public class PanelHistograma extends JPanel {
     	float offsetX = 20;
     	
     	float inicioX = offsetX;
-    	float inicioY = 170;
+    	float inicioY = altoHist - 10;
+    	float alturaMax = inicioY - 10;
     	
-
     	for(int nivel = 0 ; nivel < 256; nivel ++)    	
 	    	for( int j = 0; j<altoImg ; j++)
 	    		for( int i = 0; i<anchoImg ; i++){
@@ -101,7 +101,7 @@ public class PanelHistograma extends JPanel {
 		System.out.println("TOTAL: "+total);
 		
     	for(int i= 0; i<256;i++) {
-    		for(int h=0; h<(int) (frecRelativaNivel[i]*150);h++)
+    		for(int h=0; h<(int) (frecRelativaNivel[i]*alturaMax);h++)
     			img.setRGB((int) inicioX + i, (int) (inicioY-h), 0x0fffff);
     	}
 

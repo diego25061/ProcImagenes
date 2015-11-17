@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 public class PanelDibujo extends JPanel {
 	
 	  
-	String direccion = "imagenes/imgLago.jpg";
+	String direccion = "imagenes/imgLena1.jpg";
 	  
 	
 	private BufferedImage image;
