@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -45,8 +46,8 @@ public class Ventana1 {
 	PanelImagen imagenHistogramaInicial;
 	PanelImagen imagenHistogramaFinal;
 	
-	String direccion = "imagenes/imgLenaDanho.jpg";
-	String direccionTD2 = "imagenes/td1.jpg";
+	String direccion = "NULA";
+	//String direccionTD2 = "imagenes/td1.jpg";
 	
 	private CargadorImagen cargadorImagen;
 	FiltroEcualizacion filtroEcualizacion;
@@ -297,12 +298,13 @@ public class Ventana1 {
 		mnArchivo.add(mntmImportarImagen);
 		
 		mntmSalir = new JMenuItem("Salir");
-		mntmSalir.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
+		
+		mntmSalir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				frmProcesadorDeImagenes.dispatchEvent(new WindowEvent(frmProcesadorDeImagenes, WindowEvent.WINDOW_CLOSING));
 			}
-		});
+		}); 
+		
 		mnArchivo.add(mntmSalir);
 	}
 	
@@ -357,14 +359,14 @@ public class Ventana1 {
 		imagenHistogramaFinal.setImagen(CreadorHistograma.componerImagen(300, 150, img4));
 		imagenHistogramaFinal.repaint();
 	}
-	
-	private void recargarImagen(){
-		BufferedImage imgOrig = cargadorImagen.cargarImagen(direccion);
-	}
+	 
 	
 	private void crearImagenes(){
-		
-		BufferedImage imgOrig = cargadorImagen.cargarImagen(direccion);
+		BufferedImage imgOrig;
+		if(direccion.equals("NULA"))
+			imgOrig = new BufferedImage(10,10,BufferedImage.TYPE_INT_RGB);
+		else
+			imgOrig = cargadorImagen.cargarImagen(direccion);
 		
 		FiltroNoRuidoMedia filtro2 = new FiltroNoRuidoMedia();	
 		FiltroNoRuidoMediana filtro  = new FiltroNoRuidoMediana();	
@@ -381,15 +383,17 @@ public class Ventana1 {
 		imagen1.setImagen(imgOrig);
 		imagen2.setImagen(imgOrigbn);
 		imagen3.setImagen(imgOrigFiltro);
-		imagen4.setImagen(imgEcualizada);
-		
+		imagen4.setImagen(imgEcualizada); 
 		imagen1.repaint();
 		imagen2.repaint();
 		imagen3.repaint();
 		imagen4.repaint();
 		
 		imagenHistogramaInicial.setImagen(CreadorHistograma.componerImagen(300, 150, imgOrig));
-		imagenHistogramaFinal.setImagen(CreadorHistograma.componerImagen(300, 150, imgEcualizada));		
+		imagenHistogramaFinal.setImagen(CreadorHistograma.componerImagen(300, 150, imgEcualizada));
+		
+		imagenHistogramaInicial.repaint();
+		imagenHistogramaFinal.repaint();
 	}
 }
 
