@@ -1,78 +1,90 @@
 package procImagenes;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.Panel;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import java.awt.Color;
 import java.awt.Dimension;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JTextPane;
+import java.awt.EventQueue;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.SystemColor;
-import javax.swing.border.BevelBorder;
+import java.awt.image.BufferedImage;
+import java.io.File;
+
 import javax.swing.BoxLayout;
-import javax.swing.JMenuBar;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import java.awt.Component;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.FlowLayout;
-import java.awt.Insets;
-import javax.swing.SwingConstants;
-import javax.swing.JRadioButton;
-import javax.swing.JSlider;
-import javax.swing.border.LineBorder;
-import java.awt.Color;
-import javax.swing.border.MatteBorder;
+import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.UIManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import procImagenes.PanelImagen.TipoEscala;
+import procImagenes.filtros.FiltroEcualizacion;
+import procImagenes.filtros.FiltroNoRuidoMedia;
+import procImagenes.filtros.FiltroNoRuidoMediana;
 
 public class Ventana1 {
+
+	PanelImagen imagen1;
+	PanelImagen imagen2;
+	PanelImagen imagen3;
+	PanelImagen imagen4;
+	
+	PanelImagen imagenHistogramaInicial;
+	PanelImagen imagenHistogramaFinal;
+	
+	String direccion = "imagenes/imgLenaDanho.jpg";
+	String direccionTD2 = "imagenes/td1.jpg";
+	
+	private CargadorImagen cargadorImagen;
+	FiltroEcualizacion filtroEcualizacion;
 	
 	private static final int anchoPanelHistograma= 300;
 	private static final int alturaPanelHistograma= 150;
 
 	private JFrame frmProcesadorDeImagenes;
-	PanelDibujo panelImgOriginal;
-	PanelHistograma panelHistogramaInicial ;
+	private PanelImagen panelImgOriginal;
+	private PanelImagen panelHistogramaInicial ;
 	private JPanel panelImagenes;
 	private JPanel panelDerecho;
 	private JMenuBar menuBar;
 	private JMenu mnArchivo;
 	private JMenuItem mntmImportarImagen;
 	private JMenuItem mntmSalir;
-	private PanelDibujo panelImgByN;
+	private PanelImagen panelImgByN;
 	private JPanel panel;
 	private JPanel panel_1;
-	private PanelDibujo panelImgByNSinRuido;
-	private PanelDibujo panelImgFinal;
+	private PanelImagen panelImgByNSinRuido;
+	private PanelImagen panelImgFinal;
 	private JPanel panelOpciones;
 	private JPanel panel_2;
 	private JLabel lblNewLabel;
-	private JRadioButton rdbtnNewRadioButton;
-	private JRadioButton rdbtnNewRadioButton_1;
 	private JLabel lblContraste;
-	private JSlider slider;
 	private JPanel panel_3;
 	private JPanel panel_4;
 	private JPanel panel_5;
 	private JPanel panel_6;
+	private JComboBox cbxVista;
+	private JComboBox cbxRuido;
 	
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -92,6 +104,20 @@ public class Ventana1 {
 	 * Create the application.
 	 */
 	public Ventana1() {
+		cargadorImagen = new CargadorImagen();
+
+		imagen1 = new PanelImagen();
+		imagen2 = new PanelImagen();
+		imagen3 = new PanelImagen();
+		imagen4 = new PanelImagen();
+
+		imagenHistogramaInicial = new PanelImagen();
+		imagenHistogramaFinal = new PanelImagen();
+		
+		PanelImagen.cambiarTipoEscala(TipoEscala.CENTRADO);
+		
+		crearImagenes();
+		//creando ventana
 		initialize();
 	}
 
@@ -118,7 +144,7 @@ public class Ventana1 {
 		panel.add(panel_3);
 		panel_3.setLayout(new BorderLayout(0, 0));
 		
-		panelImgOriginal = new PanelDibujo();
+		panelImgOriginal = imagen1;
 		panel_3.add(panelImgOriginal);
 		panelImgOriginal.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		
@@ -127,7 +153,7 @@ public class Ventana1 {
 		panel.add(panel_5);
 		panel_5.setLayout(new BorderLayout(0, 0));
 		
-		panelImgByNSinRuido = new PanelDibujo();
+		panelImgByNSinRuido = imagen3;
 		panel_5.add(panelImgByNSinRuido);
 		panelImgByNSinRuido.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		
@@ -140,16 +166,16 @@ public class Ventana1 {
 		panel_1.add(panel_4);
 		panel_4.setLayout(new BorderLayout(0, 0));
 		
-		panelImgByN = new PanelDibujo();
+		panelImgByN = imagen2;
 		panel_4.add(panelImgByN);
 		panelImgByN.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		
 		panel_6 = new JPanel();
-		panel_6.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Imagen final: contraste arreglado", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+		panel_6.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Imagen final: histograma ecualizado", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 		panel_1.add(panel_6);
 		panel_6.setLayout(new BorderLayout(0, 0));
 		
-		panelImgFinal = new PanelDibujo();
+		panelImgFinal = imagen4;
 		panel_6.add(panelImgFinal);
 		panelImgFinal.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		
@@ -163,12 +189,12 @@ public class Ventana1 {
 		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.Y_AXIS));
  
 		
-		panelHistogramaInicial = new PanelHistograma();
+		panelHistogramaInicial = imagenHistogramaInicial;
 		panel_2.add(panelHistogramaInicial);
 		panelHistogramaInicial.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		panelHistogramaInicial.setPreferredSize(new Dimension(anchoPanelHistograma,alturaPanelHistograma));
 		
-		JPanel panelHistogramaFinal = new JPanel();
+		JPanel panelHistogramaFinal = imagenHistogramaFinal;
 		panel_2.add(panelHistogramaFinal);
 		panelHistogramaFinal.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		panelHistogramaFinal.setPreferredSize(new Dimension(anchoPanelHistograma,alturaPanelHistograma));
@@ -190,52 +216,47 @@ public class Ventana1 {
 		gbc_lblNewLabel.gridy = 0;
 		panelOpciones.add(lblNewLabel, gbc_lblNewLabel);
 		
-		rdbtnNewRadioButton = new JRadioButton("Media");
-		GridBagConstraints gbc_rdbtnNewRadioButton = new GridBagConstraints();
-		gbc_rdbtnNewRadioButton.anchor = GridBagConstraints.WEST;
-		gbc_rdbtnNewRadioButton.insets = new Insets(0, 5, 5, 0);
-		gbc_rdbtnNewRadioButton.gridx = 0;
-		gbc_rdbtnNewRadioButton.gridy = 1;
-		panelOpciones.add(rdbtnNewRadioButton, gbc_rdbtnNewRadioButton);
+		cbxRuido = new JComboBox();
+		cbxRuido.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				JComboBox cbx =((JComboBox)arg0.getSource());
+				cambiarTipoFiltro(cbx.getSelectedIndex());
+			}
+		});
+		cbxRuido.setModel(new DefaultComboBoxModel(new String[] {"MEDIANA", "MEDIA"}));
+		cbxRuido.setSelectedIndex(0);
+		GridBagConstraints gbc_cbxRuido = new GridBagConstraints();
+		gbc_cbxRuido.insets = new Insets(0, 0, 5, 0);
+		gbc_cbxRuido.fill = GridBagConstraints.HORIZONTAL;
+		gbc_cbxRuido.gridx = 0;
+		gbc_cbxRuido.gridy = 1;
+		panelOpciones.add(cbxRuido, gbc_cbxRuido);
 		
-		rdbtnNewRadioButton_1 = new JRadioButton("Mediana");
-		GridBagConstraints gbc_rdbtnNewRadioButton_1 = new GridBagConstraints();
-		gbc_rdbtnNewRadioButton_1.anchor = GridBagConstraints.WEST;
-		gbc_rdbtnNewRadioButton_1.insets = new Insets(0, 5, 5, 0);
-		gbc_rdbtnNewRadioButton_1.gridx = 0;
-		gbc_rdbtnNewRadioButton_1.gridy = 2;
-		panelOpciones.add(rdbtnNewRadioButton_1, gbc_rdbtnNewRadioButton_1);
-		
-		lblContraste = new JLabel("Contraste");
+		lblContraste = new JLabel("Vista imagen");
 		GridBagConstraints gbc_lblContraste = new GridBagConstraints();
 		gbc_lblContraste.anchor = GridBagConstraints.WEST;
 		gbc_lblContraste.insets = new Insets(0, 5, 5, 0);
 		gbc_lblContraste.gridx = 0;
-		gbc_lblContraste.gridy = 3;
+		gbc_lblContraste.gridy = 2;
 		panelOpciones.add(lblContraste, gbc_lblContraste);
 		
-		slider = new JSlider();
-		GridBagConstraints gbc_slider = new GridBagConstraints();
-		gbc_slider.fill = GridBagConstraints.HORIZONTAL;
-		gbc_slider.anchor = GridBagConstraints.WEST;
-		gbc_slider.insets = new Insets(0, 5, 5, 0);
-		gbc_slider.gridx = 0;
-		gbc_slider.gridy = 4;
-		panelOpciones.add(slider, gbc_slider);
-		
-		JButton btnEcualizar = new JButton("Histograma");
-		GridBagConstraints gbc_btnEcualizar = new GridBagConstraints();
-		gbc_btnEcualizar.anchor = GridBagConstraints.SOUTH;
-		gbc_btnEcualizar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnEcualizar.gridx = 0;
-		gbc_btnEcualizar.gridy = 6;
-		panelOpciones.add(btnEcualizar, gbc_btnEcualizar);
-		btnEcualizar.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent arg0) {
-				panelHistogramaInicial.declararIntensidades(panelImgOriginal.getIntensidades(), panelImgOriginal.getAnchoImg(), panelImgOriginal.getAltoImg());
+		cbxVista = new JComboBox();
+		cbxVista.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cambiarVisionEscala(((JComboBox)e.getSource()).getSelectedIndex());
 			}
 		});
+		cbxVista.setModel(new DefaultComboBoxModel(new String[] {"CENTRADO", "ESTIRADO", "SIMPLE"}));
+		cbxVista.setSelectedIndex(0);
+		GridBagConstraints gbc_cbxVista = new GridBagConstraints();
+		gbc_cbxVista.insets = new Insets(0, 0, 5, 0);
+		gbc_cbxVista.fill = GridBagConstraints.HORIZONTAL;
+		gbc_cbxVista.gridx = 0;
+		gbc_cbxVista.gridy = 3;
+		panelOpciones.add(cbxVista, gbc_cbxVista);
 		
 		menuBar = new JMenuBar();
 		frmProcesadorDeImagenes.setJMenuBar(menuBar);
@@ -244,6 +265,35 @@ public class Ventana1 {
 		menuBar.add(mnArchivo);
 		
 		mntmImportarImagen = new JMenuItem("Importar imagen");
+		mntmImportarImagen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+	            System.out.println("asdasd");
+
+				JFileChooser fc= new JFileChooser();
+				
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("Imagenes JPG", "jpg");
+				fc.setFileFilter(filter);
+				
+				fc.setCurrentDirectory(new File("C:\\EclipseLuna workspace\\ProcImagenes\\imagenes"));
+
+		        int returnVal = fc.showOpenDialog(frmProcesadorDeImagenes );
+
+		        if (returnVal == JFileChooser.APPROVE_OPTION) {
+		            File file = fc.getSelectedFile();
+		            
+		            System.out.println("Opening: " + file.getPath() + ".");
+		            direccion = file.getPath();
+		            crearImagenes();
+		        } else 
+		        	System.out.println("Open command cancelled by user.");
+		        
+			}
+		});
+		mntmImportarImagen.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+			}
+		});
 		mnArchivo.add(mntmImportarImagen);
 		
 		mntmSalir = new JMenuItem("Salir");
@@ -255,4 +305,91 @@ public class Ventana1 {
 		});
 		mnArchivo.add(mntmSalir);
 	}
+	
+	private void cambiarVisionEscala(int index){
+
+		
+		switch (index){
+		//mediana
+		case 0:
+			PanelImagen.cambiarTipoEscala(TipoEscala.CENTRADO);			
+			break;
+		case 1:
+			PanelImagen.cambiarTipoEscala(TipoEscala.ESTIRADO);
+			break;
+		case 2:
+			PanelImagen.cambiarTipoEscala(TipoEscala.SIMPLE);
+			break;
+		}
+		
+		imagen1.repaint();
+		imagen2.repaint();
+		imagen3.repaint();
+		imagen4.repaint();
+		
+	 
+	}
+	
+	private void cambiarTipoFiltro(int index){
+
+		//PanelImagen.cambiarTipoEscala(TipoEscala.CENTRADO);
+		BufferedImage img3 = null;
+		switch (index){
+		//mediana
+		case 0:
+			FiltroNoRuidoMediana filtro  = new FiltroNoRuidoMediana();	
+			img3 = PanelImagen.procesarImagenGrises( filtro.aplicarFiltro(InfoImagen.getMatrizIntensidadesGris(imagen2.getImagen())));
+			break;
+
+		//media
+		case 1:
+			FiltroNoRuidoMedia filtro2  = new FiltroNoRuidoMedia();	
+			img3 = PanelImagen.procesarImagenGrises( filtro2.aplicarFiltro(InfoImagen.getMatrizIntensidadesGris(imagen2.getImagen())));
+			break;
+		}
+		BufferedImage img4 = PanelImagen.procesarImagenGrises( filtroEcualizacion.aplicarFiltro(InfoImagen.getMatrizIntensidadesGris(img3)));
+
+		imagen3.setImagen(img3);
+		imagen4.setImagen(img4);
+		
+		imagen3.repaint();
+		imagen4.repaint();
+		imagenHistogramaFinal.setImagen(CreadorHistograma.componerImagen(300, 150, img4));
+		imagenHistogramaFinal.repaint();
+	}
+	
+	private void recargarImagen(){
+		BufferedImage imgOrig = cargadorImagen.cargarImagen(direccion);
+	}
+	
+	private void crearImagenes(){
+		
+		BufferedImage imgOrig = cargadorImagen.cargarImagen(direccion);
+		
+		FiltroNoRuidoMedia filtro2 = new FiltroNoRuidoMedia();	
+		FiltroNoRuidoMediana filtro  = new FiltroNoRuidoMediana();	
+		filtroEcualizacion  = new FiltroEcualizacion(0,255);	
+		
+		//InfoImagen infoImgOriginal = new InfoImagen(imgOrig);		
+		BufferedImage imgOrigbn = PanelImagen.procesarImagenGrises( InfoImagen.getMatrizIntensidadesGris(imgOrig));
+		
+		//InfoImagen infoImgOrigBN = new InfoImagen(imgOrigbn);		
+		BufferedImage imgOrigFiltro = PanelImagen.procesarImagenGrises( filtro.aplicarFiltro(InfoImagen.getMatrizIntensidadesGris(imgOrigbn)));
+		
+		BufferedImage imgEcualizada = PanelImagen.procesarImagenGrises( filtroEcualizacion.aplicarFiltro(InfoImagen.getMatrizIntensidadesGris(imgOrigFiltro)));
+		 	
+		imagen1.setImagen(imgOrig);
+		imagen2.setImagen(imgOrigbn);
+		imagen3.setImagen(imgOrigFiltro);
+		imagen4.setImagen(imgEcualizada);
+		
+		imagen1.repaint();
+		imagen2.repaint();
+		imagen3.repaint();
+		imagen4.repaint();
+		
+		imagenHistogramaInicial.setImagen(CreadorHistograma.componerImagen(300, 150, imgOrig));
+		imagenHistogramaFinal.setImagen(CreadorHistograma.componerImagen(300, 150, imgEcualizada));		
+	}
 }
+

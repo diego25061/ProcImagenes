@@ -31,7 +31,7 @@ public class PanelDibujo extends JPanel {
        }
 
     	ancho = image.getWidth();
-    	alto= image.getHeight();
+    	alto = image.getHeight();
     }
 
     @Override
